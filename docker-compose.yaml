@@ -1,0 +1,22 @@
+version: "3.3"
+services:
+  badger-bot:
+    build: 
+      context: .
+      dockerfile: ./docker/badger-bot/Dockerfile
+  bbadger-bot:
+    build: 
+      context: .
+      dockerfile: ./docker/bbadger-bot/Dockerfile
+  digg-bot:
+    build: 
+      context: .
+      dockerfile: ./docker/digg-bot/Dockerfile
+  bdigg-bot:
+    build: 
+      context: .
+      dockerfile: ./docker/bdigg-bot/Dockerfile
+  # price-bots:
+  #   build:
+  #     context: .
+  #     dockerfile: ./docker/price-bots/all-bots/Dockerfile
