@@ -17,7 +17,7 @@ if __name__ == "__main__":
     loop = asyncio.get_event_loop()
 
     badger_client = PriceBot(
-        coingecko_token_id="https://api.coingecko.com/api/v3/coins/interest-bearing-bitcoin",
+        coingecko_token_id="interest-bearing-bitcoin",
         token_display="ibBTC",
         discord_id=os.getenv("BOT_ID_IBBTC"),
     )
