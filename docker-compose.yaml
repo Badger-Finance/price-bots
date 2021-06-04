@@ -1,22 +1,20 @@
 version: "3.3"
 services:
   badger-bot:
+    image: price-bot
+    command: python scripts/run_badger_bot.py
     build: 
       context: .
-      dockerfile: ./docker/badger-bot/Dockerfile
+      dockerfile: Dockerfile
   bbadger-bot:
-    build: 
-      context: .
-      dockerfile: ./docker/bbadger-bot/Dockerfile
+    image: price-bot
+    command: python scripts/run_bbadger_bot.py
   digg-bot:
-    build: 
-      context: .
-      dockerfile: ./docker/digg-bot/Dockerfile
+    image: price-bot
+    command: python scripts/run_digg_bot.py
   bdigg-bot:
-    build: 
-      context: .
-      dockerfile: ./docker/bdigg-bot/Dockerfile
-  # price-bots:
-  #   build:
-  #     context: .
-  #     dockerfile: ./docker/price-bots/all-bots/Dockerfile
+    image: price-bot
+    command: python scripts/run_bdigg_bot.py
+  ibbtc-bot:
+    image: price-bot
+    command: python scripts/run_ibbtc_bot.py
