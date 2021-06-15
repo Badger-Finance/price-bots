@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: badger-price-bot
+  labels:
+    app: badger-price-bot
+    service: badger-price-bot
+spec:
+  selector:
+    app: badger-price-bot
+  ports:
+    - name: http
+      port: 9000

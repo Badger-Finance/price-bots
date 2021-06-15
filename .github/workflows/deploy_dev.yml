@@ -1,0 +1,99 @@
+name: Pull Request - Build and Deploy to Development Environment
+# Code probably works, but may not.
+# Pushing to development environment allows for validation.
+
+on:
+  pull_request:
+    branches:
+      - main
+
+env:
+  TARGET_ENVIRONMENT: 'dev'
+  MANIFEST_RESPOSITORY: 'badger-finance/badger_k8s_manifests'
+  IMAGE_NAME: 'gcr.io/badger-finance/${{github.event.repository.name}}:${{ github.event.pull_request.head.sha }}'
+
+jobs:
+  build:
+    name: Build Container Image
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout Service
+        uses: actions/checkout@main
+      - name: Checkout Shared Actions
+        uses: actions/checkout@main
+        with:
+          repository: badger-finance/ci_tools
+          token: ${{ secrets.GH_TOKEN }}
+          path: .github/badger-finance/ci_tools/
+      - name: Registry Setup
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          version: '297.0.0'
+          service_account_key: ${{secrets.GCLOUD_SERVICE_ACCOUNT_KEY}}
+          export_default_credentials: true
+      - name: Setup Docker Client
+        uses: ./.github/badger-finance/ci_tools/registry-auth
+      - name: Build
+        uses: ./.github/badger-finance/ci_tools/build
+        with:
+          image_name: ${{ env.IMAGE_NAME }}
+      - name: Register
+        uses: ./.github/badger-finance/ci_tools/register
+        with:
+          image_name: ${{ env.IMAGE_NAME }}
+      - name: Sign out
+        uses: ./.github/badger-finance/ci_tools/signout
+
+  validate_manifest:
+    name: Run Manifest Validation
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout Service
+        uses: actions/checkout@main
+      - name: Run Manifest Validation
+        run: |
+          make install_validate_manifest
+          make validate_manifest TARGET_ENVIRONMENT=${{ env.TARGET_ENVIRONMENT }}
+
+  deploy-dev:
+    name: Release to Development Environemnt
+    runs-on: ubuntu-20.04
+    needs: [build, validate_manifest, lint, unit, security, integration]
+    steps:
+      - name: Checkout Service
+        uses: actions/checkout@main
+        with:
+          ref: ${{ github.head_ref }}
+      - name: Checkout Shared Actions
+        uses: actions/checkout@main
+        with:
+          repository: badger-finance/ci_tools
+          token: ${{ secrets.GH_TOKEN }}
+          path: .github/badger-finance/ci_tools/
+      - name: Deploy
+        uses: ./.github/badger-finance/ci_tools/deploy
+        with:
+          image_tag: ${{ github.event.pull_request.head.sha }}
+          manifest_repository: ${{ env.MANIFEST_RESPOSITORY }}
+          target_environment: dev
+          gh_token: ${{ secrets.GH_TOKEN }}
+
+  notify:
+    name: Notify Chat
+    if: always()
+    runs-on: ubuntu-20.04
+    needs: [deploy-dev]
+    steps:
+      - name: Notification to Slack
+        uses: iRoachie/slack-github-actions@v2.3.0
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Notification to Teams
+        uses: toko-bifrost/ms-teams-deploy-card@3.1.2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          webhook-uri: ${{ secrets.MS_TEAMS_WEBHOOK_URI }}
+          show-on-start: false
+          card-layout-exit: complete
+          show-on-failure: true
