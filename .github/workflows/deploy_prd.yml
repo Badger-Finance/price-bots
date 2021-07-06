@@ -106,7 +106,7 @@ jobs:
     name: Notify Chat
     if: always()
     runs-on: ubuntu-20.04
-    needs: [deploy-dev]
+    needs: [deploy-prd]
     steps:
     - name: Discord notification
       env:
