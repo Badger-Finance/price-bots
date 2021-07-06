@@ -15,38 +15,25 @@ env:
 jobs:
   build:
     name: Build Container Image
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Service
         uses: actions/checkout@main
-      - name: Checkout Shared Actions
-        uses: actions/checkout@main
-        with:
-          repository: badger-finance/ci_tools
-          token: ${{ secrets.GH_TOKEN }}
-          path: .github/badger-finance/ci_tools/
-      - name: Registry Setup
-        uses: google-github-actions/setup-gcloud@master
-        with:
-          version: '297.0.0'
-          service_account_key: ${{secrets.GCLOUD_SERVICE_ACCOUNT_KEY}}
-          export_default_credentials: true
-      - name: Setup Docker Client
-        uses: ./.github/badger-finance/ci_tools/registry-auth
-      - name: Build
-        uses: ./.github/badger-finance/ci_tools/build
-        with:
-          image_name: ${{ env.IMAGE_NAME }}
-      - name: Register
-        uses: ./.github/badger-finance/ci_tools/register
-        with:
-          image_name: ${{ env.IMAGE_NAME }}
-      - name: Sign out
-        uses: ./.github/badger-finance/ci_tools/signout
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+      - name: Build, tag, and push image to Amazon ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ github.event.repository.name }}
+          IMAGE_TAG: ${{ github.event.pull_request.head.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
   validate_manifest:
     name: Run Manifest Validation
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Service
         uses: actions/checkout@main
@@ -57,26 +44,70 @@ jobs:
 
   deploy-dev:
     name: Release to Development Environemnt
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     needs: [build, validate_manifest, lint, unit, security, integration]
     steps:
       - name: Checkout Service
         uses: actions/checkout@main
         with:
           ref: ${{ github.head_ref }}
-      - name: Checkout Shared Actions
-        uses: actions/checkout@main
-        with:
-          repository: badger-finance/ci_tools
-          token: ${{ secrets.GH_TOKEN }}
-          path: .github/badger-finance/ci_tools/
-      - name: Deploy
-        uses: ./.github/badger-finance/ci_tools/deploy
-        with:
-          image_tag: ${{ github.event.pull_request.head.sha }}
-          manifest_repository: ${{ env.MANIFEST_RESPOSITORY }}
-          target_environment: dev
-          gh_token: ${{ secrets.GH_TOKEN }}
+      - name: Checkout Manifest Repository
+        shell: bash
+        run: |
+          set -Eeuxo pipefail
+          WORKDIR="$(pwd)/manifests"
+          echo "Getting Git version info"
+          echo "Working directory is $WORKDIR"
+          /usr/bin/git version
+          echo "Initializing the repository"
+          /usr/bin/git init $WORKDIR
+          cd $WORKDIR
+          /usr/bin/git remote add origin https://github.com/${{ env.MANIFEST_RESPOSITORY }}
+          echo "Disabling automatic garbage collection"
+          /usr/bin/git config --local gc.auto 0
+          echo "Setting up auth"
+          git config --local user.email "github@badger-finance.com"
+          git config --local user.name "${{ github.actor }}"
+          /usr/bin/git config --local http.https://github.com/.extraheader "AUTHORIZATION: basic $(echo -n x-access-token:${{ secrets.GH_TOKEN }} | base64 )"
+          echo "Fetching the repository"
+          /usr/bin/git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin +refs/heads/${{ env.TARGET_ENVIRONMENT }}*:refs/remotes/origin/${{ env.TARGET_ENVIRONMENT }}* +refs/tags/${{ env.TARGET_ENVIRONMENT }}*:refs/tags/${{ env.TARGET_ENVIRONMENT }}*
+          echo "Determining the checkout info"
+          /usr/bin/git branch --list --remote origin/${{ env.TARGET_ENVIRONMENT }}
+          echo "Checking out the ref"
+          /usr/bin/git checkout --progress --force -B ${{ env.TARGET_ENVIRONMENT }} refs/remotes/origin/${{ env.TARGET_ENVIRONMENT }}
+          /usr/bin/git log -1 --format='%H'
+      - name: Create Application Definition
+        shell: bash
+        run: |
+          set -Eeuxo pipefail
+          echo "Creating Application Definition"
+          mkdir -p manifests/applications/
+          cat ./.deploy/base/.app.yaml | sed "s/TARGET_ENVIRONMENT/${{ env.TARGET_ENVIRONMENT }}/g" \
+              > manifests/applications/${{github.event.repository.name}}.yaml
+      - name: Kustomize Manifest
+        shell: bash
+        run: |
+          echo "Install Kustomize"
+          curl -o kustomize.tar.gz --location https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v3.8.1/kustomize_v3.8.1_linux_amd64.tar.gz
+          tar -xzvf kustomize.tar.gz
+          echo "Maybe Create Manifest Directory"
+          mkdir -p manifests/${{ github.event.repository.name }}/
+          echo "Kustomize Manifest and Replace with SHA"
+          ./kustomize build ./.deploy/${{ env.TARGET_ENVIRONMENT }} |
+          sed "s/COMMIT_SHA/${{ github.event.pull_request.head.sha }}/g" \
+          > manifests/${{ github.event.repository.name }}/manifest.yaml
+      - name: Commit and Push New Manifest
+        shell: bash
+        run: |
+          echo "Commit New Manifest"
+          cd manifests
+          git config --local user.email "github@badger-finance.com"
+          git config --local user.name "${{ github.actor }}"
+          git add ${{ github.event.repository.name }} applications/
+          git commit -m "Deploying ${{ github.event.repository.name }}:${{ github.event.pull_request.head.sha }}" || echo "¯\_(ツ)_/¯ Nothing changed, so nothing committed, and nothing new will be pushed to manifests."
+          echo "Push New Manifest"
+          git push https://${{github.actor}}:${{secrets.GH_TOKEN}}@github.com/${{ env.MANIFEST_RESPOSITORY }}.git HEAD:${{env.TARGET_ENVIRONMENT}}
+
 
   notify:
     name: Notify Chat
@@ -84,16 +115,9 @@ jobs:
     runs-on: ubuntu-20.04
     needs: [deploy-dev]
     steps:
-      - name: Notification to Slack
-        uses: iRoachie/slack-github-actions@v2.3.0
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Notification to Teams
-        uses: toko-bifrost/ms-teams-deploy-card@3.1.2
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          webhook-uri: ${{ secrets.MS_TEAMS_WEBHOOK_URI }}
-          show-on-start: false
-          card-layout-exit: complete
-          show-on-failure: true
+    - name: Discord notification
+      env:
+        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+      uses: Ilshidur/action-discord@master
+      with:
+        args: '${{github.event.repository.name}} has been deployed to ${{ env.TARGET_ENVIRONMENT }}.'
