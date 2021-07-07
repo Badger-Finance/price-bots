@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: badger-price-bot
-          image: ecr.io/badger/price-bots:COMMIT_SHA
+          image: IMAGE_NAME
           imagePullPolicy: IfNotPresent
           command: ["python scripts/run_badger_bot.py"]
           env:

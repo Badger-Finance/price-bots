@@ -16,8 +16,9 @@ spec:
     spec:
       containers:
         - name: bbadger-price-bot
-          image: ecr.io/badger/price-bots:COMMIT_SHA
+          image: IMAGE_NAME
           imagePullPolicy: IfNotPresent
+          command: ["python scripts/run_bbadger_bot.py"]
           env:
             - name: LOG_LEVEL
               value: 'info'
