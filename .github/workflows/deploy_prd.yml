@@ -4,12 +4,12 @@ name: Tag on Main - Build and Deploy to Production Environment
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+    - main
 
 env:
   TARGET_ENVIRONMENT: 'prd'
-  MANIFEST_RESPOSITORY: 'badger-finance/badger_k8s_manifests'
+  MANIFEST_RESPOSITORY: 'badger-finance/badger-kube-manifests'
   TAG_IMAGE_NAME: 'gcr.io/badger-finance/${{github.event.repository.name}}:${GITHUB_REF##*/}'
 
 jobs:

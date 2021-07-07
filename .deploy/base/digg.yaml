@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: digg-price-bot
+  labels:
+    app: digg-price-bot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: digg-price-bot
+  template:
+    metadata:
+      labels:
+        app: digg-price-bot
+    spec:
+      containers:
+        - name: digg-price-bot
+          image: ecr.io/badger/price-bots:COMMIT_SHA
+          imagePullPolicy: IfNotPresent
+          command: ["python scripts/run_digg_bot.py"]
+          env:
+            - name: LOG_LEVEL
+              value: 'info'

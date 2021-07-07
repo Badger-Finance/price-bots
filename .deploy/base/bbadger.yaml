@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bbadger-price-bot
+  labels:
+    app: bbadger-price-bot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bbadger-price-bot
+  template:
+    metadata:
+      labels:
+        app: bbadger-price-bot
+    spec:
+      containers:
+        - name: bbadger-price-bot
+          image: ecr.io/badger/price-bots:COMMIT_SHA
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: LOG_LEVEL
+              value: 'info'

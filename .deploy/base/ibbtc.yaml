@@ -1,23 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: badger-price-bot
+  name: ibbtc-price-bot
   labels:
-    app: badger-price-bot
+    app: ibbtc-price-bot
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: badger-price-bot
+      app: ibbtc-price-bot
   template:
     metadata:
       labels:
-        app: badger-price-bot
+        app: ibbtc-price-bot
     spec:
       containers:
-        - name: badger-price-bot
-          image: ecr.io/badger-finance/price_bots:COMMIT_SHA
+        - name: ibbtc-price-bot
+          image: ecr.io/badger/price-bots:COMMIT_SHA
           imagePullPolicy: IfNotPresent
+          command: ["python scripts/run_ibbtc_bot.py"]
           env:
             - name: LOG_LEVEL
               value: 'info'

@@ -9,7 +9,7 @@ on:
 
 env:
   TARGET_ENVIRONMENT: 'dev'
-  MANIFEST_RESPOSITORY: 'badger-finance/badger_k8s_manifests'
+  MANIFEST_RESPOSITORY: 'badger-finance/badger-kube-manifests'
   IMAGE_NAME: 'ecr.io/badger-finance/${{github.event.repository.name}}:${{ github.event.pull_request.head.sha }}'
 
 jobs:

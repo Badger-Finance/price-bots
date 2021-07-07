@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bdigg-price-bot
+  labels:
+    app: bdigg-price-bot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bdigg-price-bot
+  template:
+    metadata:
+      labels:
+        app: bdigg-price-bot
+    spec:
+      containers:
+        - name: bdigg-price-bot
+          image: ecr.io/badger/price-bots:COMMIT_SHA
+          imagePullPolicy: IfNotPresent
+          command: ["python scripts/run_bdigg_bot.py"]
+          env:
+            - name: LOG_LEVEL
+              value: 'info'
