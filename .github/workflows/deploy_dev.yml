@@ -10,7 +10,7 @@ on:
 env:
   TARGET_ENVIRONMENT: 'dev'
   MANIFEST_RESPOSITORY: 'badger-finance/badger_k8s_manifests'
-  IMAGE_NAME: 'gcr.io/badger-finance/${{github.event.repository.name}}:${{ github.event.pull_request.head.sha }}'
+  IMAGE_NAME: 'ecr.io/badger-finance/${{github.event.repository.name}}:${{ github.event.pull_request.head.sha }}'
 
 jobs:
   build:
@@ -45,7 +45,7 @@ jobs:
   deploy-dev:
     name: Release to Development Environemnt
     runs-on: ubuntu-latest
-    needs: [build, validate_manifest, lint, unit, security, integration]
+    needs: [build, validate_manifest]
     steps:
       - name: Checkout Service
         uses: actions/checkout@main
