@@ -22,3 +22,7 @@ spec:
           env:
             - name: LOG_LEVEL
               value: 'info'
+            - name: BBADGER_ADDRESS
+              value: '0x19D97D8fA813EE2f51aD4B4e04EA08bAf4DFfC28'
+            - name: BOT_ID_BBADGER
+              value: '835276359789576233'

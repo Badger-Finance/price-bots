@@ -22,3 +22,5 @@ spec:
           env:
             - name: LOG_LEVEL
               value: 'info'
+            - name: BOT_ID_BADGER
+              value: '835249232398254130'

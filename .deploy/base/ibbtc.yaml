@@ -22,3 +22,5 @@ spec:
           env:
             - name: LOG_LEVEL
               value: 'info'
+            - name: BOT_ID_IBBTC
+              value: '850192794517897236'
