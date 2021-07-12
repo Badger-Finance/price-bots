@@ -83,6 +83,7 @@ jobs:
         run: |
           set -Eeuxo pipefail
           echo "Creating Application Definition"
+          echo "sed \"s/TARGET_ENVIRONMENT/${{ env.TARGET_ENVIRONMENT }}/g\""
           mkdir -p manifests/applications/
           cat ./.deploy/base/.app.yaml | sed "s/TARGET_ENVIRONMENT/${{ env.TARGET_ENVIRONMENT }}/g" \
               > manifests/applications/${{github.event.repository.name}}.yaml
@@ -96,7 +97,7 @@ jobs:
           mkdir -p manifests/${{ github.event.repository.name }}/
           echo "Kustomize Manifest and Replace with SHA"
           ./kustomize build ./.deploy/${{ env.TARGET_ENVIRONMENT }} |
-          sed "s/IMAGE_NAME/\${{ steps.login-ecr.outputs.registry }}\/${{ env.IMAGE_NAME }}/g" \
+          sed "s/IMAGE_NAME/${{ steps.login-ecr.outputs.registry }}${{ env.IMAGE_NAME }}/g" \
           > manifests/${{ github.event.repository.name }}/manifest.yaml
       - name: Commit and Push New Manifest
         shell: bash
