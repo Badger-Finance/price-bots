@@ -9,6 +9,7 @@ sys.path.insert(
 )
 
 from price_bot import PriceBot
+from utils import get_secret
 
 load_dotenv()
 
@@ -22,6 +23,7 @@ if __name__ == "__main__":
         discord_id=os.getenv("BOT_ID_BADGER"),
     )
 
-    loop.create_task(badger_client.start(os.getenv("BOT_TOKEN_BADGER")))
+    bot_token = get_secret("price-bots/badger-bot-token")
+    loop.create_task(badger_client.start(bot_token))
 
     loop.run_forever()

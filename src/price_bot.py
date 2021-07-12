@@ -5,6 +5,8 @@ import logging
 import math
 import os
 import requests
+from time import sleep
+from utils import get_secret
 from web3 import Web3
 
 logging.basicConfig(
@@ -25,13 +27,16 @@ class PriceBot(discord.Client):
         if cache.get("session") == None:
             cache["session"] = requests.Session()
         if cache.get("web3") == None:
-            cache["web3"] = Web3(Web3.HTTPProvider(os.getenv("INFURA_URL")))
+            web3_url = get_secret("price-bots/infura-url")
+            cache["web3"] = Web3(Web3.HTTPProvider(web3_url))
         self.session = cache.get("session")
 
         self.coingecko_token_id = kwargs.get("coingecko_token_id")
         self.token_display = kwargs.get("token_display")
         self.token_address = kwargs.get("token_address")
         self.token_abi = kwargs.get("token_abi") if kwargs.get("token_abi") else None
+        self.monitoring_webhook_url = get_secret("price-bots/monitoring-webhook")
+        self.bot_token = get_secret("price-bots/badger-bot-token")
         if self.token_address and self.token_abi:
             self.web3 = cache.get("web3")
             self.token_contract = self.web3.eth.contract(
@@ -75,12 +80,16 @@ class PriceBot(discord.Client):
                     except Exception as e:
                         self.logger.error("Error updated nickname")
                         self.logger.error(e)
-                        webhook = discord.Webhook.from_url(os.getenv("DISCORD_MONITORING_WEBHOOK_URL"), adapter=discord.RequestsWebhookAdapter())
+                        webhook = discord.Webhook.from_url(self.monitoring_webhook_url, adapter=discord.RequestsWebhookAdapter())
                         embed = discord.Embed(
                             title=f"**{self.token_display} Price Bot Error**",
                             description=f"Error message: {e}"
                         )
                         webhook.send(embed=embed, username="Price Bot Monitoring")
+                        # sleep and restart bot if breaks
+                        sleep(10)
+                        await self.logout()
+                        await self.start(self.bot_token)
 
     @update_price.before_loop
     async def before_update_price(self):
