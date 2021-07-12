@@ -10,7 +10,7 @@ on:
 env:
   TARGET_ENVIRONMENT: 'dev'
   MANIFEST_RESPOSITORY: 'badger-finance/badger-kube-manifests'
-  IMAGE_NAME: '/badger/${{github.event.repository.name}}:${{ github.event.pull_request.head.sha }}'
+  IMAGE_NAME: '/badger/${{ github.event.repository.name }}:${{ github.event.pull_request.head.sha }}'
 
 jobs:
   build:
@@ -86,7 +86,7 @@ jobs:
           echo "sed \"s/TARGET_ENVIRONMENT/${{ env.TARGET_ENVIRONMENT }}/g\""
           mkdir -p manifests/applications/
           cat ./.deploy/base/.app.yaml | sed "s/TARGET_ENVIRONMENT/${{ env.TARGET_ENVIRONMENT }}/g" \
-              > manifests/applications/${{github.event.repository.name}}.yaml
+              > manifests/applications/${{ github.event.repository.name }}.yaml
       - name: Kustomize Manifest
         shell: bash
         run: |
@@ -109,7 +109,7 @@ jobs:
           git add ${{ github.event.repository.name }} applications/
           git commit -m "Deploying ${{ github.event.repository.name }}:${{ github.event.pull_request.head.sha }}" || echo "¯\_(ツ)_/¯ Nothing changed, so nothing committed, and nothing new will be pushed to manifests."
           echo "Push New Manifest"
-          git push https://${{github.actor}}:${{secrets.GH_TOKEN}}@github.com/${{ env.MANIFEST_RESPOSITORY }}.git HEAD:${{env.TARGET_ENVIRONMENT}}
+          git push https://${{ github.actor }}:${{ secrets.GH_TOKEN }}@github.com/${{ env.MANIFEST_RESPOSITORY }}.git HEAD:${{ env.TARGET_ENVIRONMENT }}
 
 
   notify:
@@ -123,4 +123,4 @@ jobs:
         DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
       uses: Ilshidur/action-discord@master
       with:
-        args: '${{github.event.repository.name}} has been deployed to ${{ env.TARGET_ENVIRONMENT }}.'
+        args: '${{ github.event.repository.name }} has been deployed to ${{ env.TARGET_ENVIRONMENT }}.'
