@@ -18,7 +18,7 @@ spec:
         - name: bbadger-price-bot
           image: IMAGE_NAME
           imagePullPolicy: IfNotPresent
-          command: ["python scripts/run_bbadger_bot.py"]
+          command: ["python", "scripts/run_bbadger_bot.py"]
           env:
             - name: LOG_LEVEL
               value: 'info'

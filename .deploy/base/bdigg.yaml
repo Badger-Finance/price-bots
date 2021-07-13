@@ -18,7 +18,7 @@ spec:
         - name: bdigg-price-bot
           image: IMAGE_NAME
           imagePullPolicy: IfNotPresent
-          command: ["python scripts/run_bdigg_bot.py"]
+          command: ["python", "scripts/run_bdigg_bot.py"]
           env:
             - name: LOG_LEVEL
               value: 'info'
