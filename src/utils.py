@@ -5,34 +5,15 @@
 import boto3
 import base64
 from botocore.exceptions import ClientError
-
-def assume_role(role_arn: str) -> dict:
-    """Assumes provided IAM role and returns temp credentials.
-
-    Args:
-        role_arn (str): AWS arn of iam role to assume.
-
-    Returns:
-        dict: Temporary AWS credentials to use in subsequent calls.
-    """
-    sts_client = boto3.client('sts')
-
-    assumed_role_object = sts_client.assume_role(
-        RoleArn=role_arn,
-        RoleSessionName="AssumeRoleSession1"
-    )
-
-    # From the response that contains the assumed role, get the temporary 
-    # credentials that can be used to make subsequent API calls
-    return assumed_role_object['Credentials']
+import json
 
 
-def get_secret(secret_name: str, role_arn: str, region_name: str = "us-west-1") -> str:
+def get_secret(secret_name: str, secret_key: str, region_name: str = "us-west-1") -> str:
     """Retrieves secret from AWS secretsmanager.
 
     Args:
         secret_name (str): secret name in secretsmanager
-        role_arn (str): Arn for IAM role to use to grab secrets
+        secret_key (str): Dict key value to use to access secret value
         region_name (str, optional): AWS region name for secret. Defaults to "us-west-1".
 
     Raises:
@@ -46,16 +27,11 @@ def get_secret(secret_name: str, role_arn: str, region_name: str = "us-west-1") 
         str: secret value
     """
 
-    # credentials = assume_role(role_arn)
-
     # Create a Secrets Manager client
     session = boto3.session.Session()
     client = session.client(
         service_name='secretsmanager',
         region_name=region_name,
-        # aws_access_key_id=credentials['AccessKeyId'],
-        # aws_secret_access_key=credentials['SecretAccessKey'],
-        # aws_session_token=credentials['SessionToken'],
     )
 
     # In this sample we only handle the specific exceptions for the 'GetSecretValue' API.
@@ -81,8 +57,8 @@ def get_secret(secret_name: str, role_arn: str, region_name: str = "us-west-1") 
         # Decrypts secret using the associated KMS CMK.
         # Depending on whether the secret is a string or binary, one of these fields will be populated.
         if 'SecretString' in get_secret_value_response:
-            return get_secret_value_response['SecretString']
+            return json.loads(get_secret_value_response['SecretString']).get(secret_key)
         else:
-            return base64.b64decode(get_secret_value_response['SecretBinary'])
+            return base64.b64decode(get_secret_value_response['SecretBinary']).get(secret_key)
             
     return None

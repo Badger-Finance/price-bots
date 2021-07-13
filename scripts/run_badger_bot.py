@@ -15,19 +15,20 @@ if __name__ == "__main__":
 
     loop = asyncio.get_event_loop()
     logger = logging.getLogger("test")
-    arn = os.getenv("ASSUME_ROLE_ARN")
-
-    logger.info(f"ASSUME_ROLE_ARN = {arn}")
+    # name of secret in secrets manager
+    bot_token_secret_name = "price-bots/badger-bot-token"
+    # key value to retrieve secret value after boto3 call to secretsmanager
+    bot_token_secret_key = "BOT_TOKEN_BADGER"
 
     badger_client = PriceBot(
         coingecko_token_id="badger-dao",
         token_display="BADGER",
         discord_id=os.getenv("BOT_ID_BADGER"),
-        bot_token_secret_name="price-bots/badger-bot-token",
-        assume_role_arn=os.getenv("ASSUME_ROLE_ARN")
+        bot_token_secret_name=bot_token_secret_name,
+        bot_token_secret_key=bot_token_secret_key
     )
 
-    bot_token = get_secret("price-bots/badger-bot-token", os.getenv("ASSUME_ROLE_ARN"))
+    bot_token = get_secret(bot_token_secret_name, bot_token_secret_key)
     loop.create_task(badger_client.start(bot_token))
 
     loop.run_forever()

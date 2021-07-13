@@ -27,7 +27,7 @@ class PriceBot(discord.Client):
         if cache.get("session") == None:
             cache["session"] = requests.Session()
         if cache.get("web3") == None:
-            web3_url = get_secret("price-bots/infura-url", kwargs.get("assume_role_arn"))
+            web3_url = get_secret("price-bots/infura-url", "INFURA_URL")
             cache["web3"] = Web3(Web3.HTTPProvider(web3_url))
         self.session = cache.get("session")
 
@@ -35,8 +35,8 @@ class PriceBot(discord.Client):
         self.token_display = kwargs.get("token_display")
         self.token_address = kwargs.get("token_address")
         self.token_abi = kwargs.get("token_abi") if kwargs.get("token_abi") else None
-        self.monitoring_webhook_url = get_secret("price-bots/monitoring-webhook", kwargs.get("assume_role_arn"))
-        self.bot_token = get_secret(kwargs.get("bot_token_secret_name"), kwargs.get("assume_role_arn"))
+        self.monitoring_webhook_url = get_secret("price-bots/monitoring-webhook", "DISCORD_MONITORING_WEBHOOK_URL")
+        self.bot_token = get_secret(kwargs.get("bot_token_secret_name"), kwargs.get("bot_token_secret_key"))
         if self.token_address and self.token_abi:
             self.web3 = cache.get("web3")
             self.token_contract = self.web3.eth.contract(
