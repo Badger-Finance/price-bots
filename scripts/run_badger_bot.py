@@ -21,9 +21,11 @@ if __name__ == "__main__":
         coingecko_token_id="badger-dao",
         token_display="BADGER",
         discord_id=os.getenv("BOT_ID_BADGER"),
+        bot_token_secret_name="price-bots/badger-bot-token",
+        assume_role_arn=os.getenv("ASSUME_ROLE_ARN")
     )
 
-    bot_token = get_secret("price-bots/badger-bot-token")
+    bot_token = get_secret("price-bots/badger-bot-token", os.getenv("ASSUME_ROLE_ARN"))
     loop.create_task(badger_client.start(bot_token))
 
     loop.run_forever()
