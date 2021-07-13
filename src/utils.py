@@ -46,16 +46,16 @@ def get_secret(secret_name: str, role_arn: str, region_name: str = "us-west-1") 
         str: secret value
     """
 
-    credentials = assume_role(role_arn)
+    # credentials = assume_role(role_arn)
 
     # Create a Secrets Manager client
     session = boto3.session.Session()
     client = session.client(
         service_name='secretsmanager',
         region_name=region_name,
-        aws_access_key_id=credentials['AccessKeyId'],
-        aws_secret_access_key=credentials['SecretAccessKey'],
-        aws_session_token=credentials['SessionToken'],
+        # aws_access_key_id=credentials['AccessKeyId'],
+        # aws_secret_access_key=credentials['SecretAccessKey'],
+        # aws_session_token=credentials['SessionToken'],
     )
 
     # In this sample we only handle the specific exceptions for the 'GetSecretValue' API.
