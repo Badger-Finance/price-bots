@@ -1,15 +1,12 @@
 from decimal import Decimal
 import discord
 from discord.ext import tasks
-from dotenv import load_dotenv
 from price_bot import PriceBot
 import os
 import requests
 import json
 from time import sleep
 from web3 import Web3
-
-load_dotenv()
 
 UPDATE_INTERVAL_SECONDS = 45
 

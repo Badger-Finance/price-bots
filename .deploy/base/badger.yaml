@@ -25,5 +25,3 @@ spec:
               value: 'info'
             - name: BOT_ID_BADGER
               value: '835249232398254130'
-            - name: ASSUME_ROLE_ARN
-              value: 'arn:aws:iam::342684350154:role/badger-price-bot'

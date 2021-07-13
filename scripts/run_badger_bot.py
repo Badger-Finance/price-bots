@@ -14,7 +14,6 @@ from utils import get_secret
 if __name__ == "__main__":
 
     loop = asyncio.get_event_loop()
-    logger = logging.getLogger("test")
     # name of secret in secrets manager
     bot_token_secret_name = "price-bots/badger-bot-token"
     # key value to retrieve secret value after boto3 call to secretsmanager

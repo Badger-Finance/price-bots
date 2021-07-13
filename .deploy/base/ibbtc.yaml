@@ -14,6 +14,7 @@ spec:
       labels:
         app: ibbtc-price-bot
     spec:
+      serviceAccountName: ibbtc-price-bot
       containers:
         - name: ibbtc-price-bot
           image: IMAGE_NAME

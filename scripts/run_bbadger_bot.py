@@ -1,5 +1,4 @@
 import asyncio
-from dotenv import load_dotenv
 import json
 import os
 import sys
@@ -9,14 +8,17 @@ sys.path.insert(
 )
 
 from sett_bot import SettBot
-
-load_dotenv()
+from utils import get_secret
 
 if __name__ == "__main__":
     with open("./contracts/abi/sett.json") as sett_abi_file:
         sett_abi = json.load(sett_abi_file)
 
     loop = asyncio.get_event_loop()
+    # name of secret in secrets manager
+    bot_token_secret_name = "price-bots/bbadger-bot-token"
+    # key value to retrieve secret value after boto3 call to secretsmanager
+    bot_token_secret_key = "BOT_TOKEN_BBADGER"
 
     bbadger_client = SettBot(
         coingecko_token_id="badger-sett-badger",
@@ -25,8 +27,11 @@ if __name__ == "__main__":
         token_abi=sett_abi,
         discord_id=os.getenv("BOT_ID_BBADGER"),
         underlying_decimals=18,
+        bot_token_secret_name=bot_token_secret_name,
+        bot_token_secret_key=bot_token_secret_key
     )
 
-    loop.create_task(bbadger_client.start(os.getenv("BOT_TOKEN_BBADGER")))
+    bot_token = get_secret(bot_token_secret_name, bot_token_secret_key)
+    loop.create_task(bbadger_client.start(bot_token))
 
     loop.run_forever()
