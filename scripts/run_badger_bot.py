@@ -1,6 +1,6 @@
 import asyncio
-from dotenv import load_dotenv
 import json
+import logging
 import os
 import sys
 
@@ -11,11 +11,12 @@ sys.path.insert(
 from price_bot import PriceBot
 from utils import get_secret
 
-load_dotenv()
-
 if __name__ == "__main__":
 
     loop = asyncio.get_event_loop()
+    logger = logging.getLogger("test")
+
+    logger.info(f"ASSUME_ROLE_ARN = {os.getenv("ASSUME_ROLE_ARN")}")
 
     badger_client = PriceBot(
         coingecko_token_id="badger-dao",
