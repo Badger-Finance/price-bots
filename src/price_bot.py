@@ -63,6 +63,8 @@ class PriceBot(discord.Client):
         activity_string = "mcap=$" + self._get_number_label(
             self.token_data.get("market_cap")
         )
+        if self.token_display == "ibBTC":
+            activity_string += " btc=" + str(round(self.token_data.get("token_price_btc"), 2))
         activity = discord.Activity(
             name=activity_string,
             type=discord.ActivityType.playing,
