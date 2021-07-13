@@ -7,3 +7,4 @@ resources:
   - digg.yaml
   - ibbtc.yaml
   - service.yaml
+  - service_account.yaml
