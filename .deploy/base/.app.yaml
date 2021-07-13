@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: badger-price-bot
+  name: badger-price-bots
   namespace: argocd
 spec:
   project: default
