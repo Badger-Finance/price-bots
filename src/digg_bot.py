@@ -16,7 +16,6 @@ DIGG_BTC_ORACLE_ADDRESS = "0x418a6C98CD5B8275955f08F0b8C1c6838c8b1685"
 
 class DiggBot(PriceBot):
     def __init__(self, *args, **kwargs):
-        self.web3 = Web3(Web3.HTTPProvider(os.getenv("INFURA_URL")))
         self.digg_oracle_abi = kwargs.get("digg_oracle_abi")
         self.btc_oracle_abi = kwargs.get("btc_oracle_abi")
         self.btc_oracle_contract = self.web3.eth.contract(
