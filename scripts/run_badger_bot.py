@@ -15,8 +15,9 @@ if __name__ == "__main__":
 
     loop = asyncio.get_event_loop()
     logger = logging.getLogger("test")
+    arn = os.getenv("ASSUME_ROLE_ARN")
 
-    logger.info(f"ASSUME_ROLE_ARN = {os.getenv("ASSUME_ROLE_ARN")}")
+    logger.info(f"ASSUME_ROLE_ARN = {arn}")
 
     badger_client = PriceBot(
         coingecko_token_id="badger-dao",
