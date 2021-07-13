@@ -6,6 +6,7 @@ import os
 import requests
 import json
 from time import sleep
+from utils import get_secret
 from web3 import Web3
 
 UPDATE_INTERVAL_SECONDS = 45
