@@ -3,9 +3,7 @@ import json
 import os
 import sys
 
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src"))
-)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
 from sett_bot import SettBot
 from utils import get_secret
@@ -28,7 +26,7 @@ if __name__ == "__main__":
         discord_id=os.getenv("BOT_ID_BDIGG"),
         underlying_decimals=9,
         bot_token_secret_name=bot_token_secret_name,
-        bot_token_secret_key=bot_token_secret_key
+        bot_token_secret_key=bot_token_secret_key,
     )
 
     bot_token = get_secret(bot_token_secret_name, bot_token_secret_key)

@@ -17,7 +17,9 @@ DIGG_BTC_ORACLE_ADDRESS = "0x418a6C98CD5B8275955f08F0b8C1c6838c8b1685"
 
 class DiggBot(PriceBot):
     def __init__(self, *args, **kwargs):
-        self.web3 = Web3(Web3.HTTPProvider(get_secret("price-bots/infura-url", "INFURA_URL")))
+        self.web3 = Web3(
+            Web3.HTTPProvider(get_secret("price-bots/infura-url", "INFURA_URL"))
+        )
         self.digg_oracle_abi = kwargs.get("digg_oracle_abi")
         self.btc_oracle_abi = kwargs.get("btc_oracle_abi")
         self.btc_oracle_contract = self.web3.eth.contract(
@@ -63,12 +65,19 @@ class DiggBot(PriceBot):
                     except Exception as e:
                         self.logger.error("Error updated nickname")
                         self.logger.error(e)
-                        webhook = discord.Webhook.from_url(os.getenv("DISCORD_MONITORING_WEBHOOK_URL"), adapter=discord.RequestsWebhookAdapter())
+                        webhook = discord.Webhook.from_url(
+                            os.getenv("DISCORD_MONITORING_WEBHOOK_URL"),
+                            adapter=discord.RequestsWebhookAdapter(),
+                        )
                         embed = discord.Embed(
                             title=f"**{self.token_display} Price Bot Error**",
-                            description=f"Error message: {e}"
+                            description=f"Error message: {e}",
                         )
                         webhook.send(embed=embed, username="Price Bot Monitoring")
+                        # sleep and restart bot if breaks
+                        sleep(10)
+                        await self.logout()
+                        await self.start(self.bot_token)
 
     @update_price.before_loop
     async def before_update_price(self):
@@ -93,15 +102,13 @@ class DiggBot(PriceBot):
     def _get_digg_btc_price(self) -> Decimal:
 
         return Decimal(
-            self.digg_oracle_contract.functions.latestRoundData().call()[1] 
-            / 10 ** 8
+            self.digg_oracle_contract.functions.latestRoundData().call()[1] / 10 ** 8
         )
 
     def _get_btc_usd_price(self) -> Decimal:
 
         return Decimal(
-            self.btc_oracle_contract.functions.latestRoundData().call()[1] 
-            / 10 ** 8
+            self.btc_oracle_contract.functions.latestRoundData().call()[1] / 10 ** 8
         )
 
     def _get_supply(self):

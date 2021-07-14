@@ -1,5 +1,5 @@
 # Use this code snippet in your app.
-# If you need more information about configurations or implementing the sample code, visit the AWS docs:   
+# If you need more information about configurations or implementing the sample code, visit the AWS docs:
 # https://aws.amazon.com/developers/getting-started/python/
 
 import boto3
@@ -8,7 +8,9 @@ from botocore.exceptions import ClientError
 import json
 
 
-def get_secret(secret_name: str, secret_key: str, region_name: str = "us-west-1") -> str:
+def get_secret(
+    secret_name: str, secret_key: str, region_name: str = "us-west-1"
+) -> str:
     """Retrieves secret from AWS secretsmanager.
 
     Args:
@@ -30,7 +32,7 @@ def get_secret(secret_name: str, secret_key: str, region_name: str = "us-west-1"
     # Create a Secrets Manager client
     session = boto3.session.Session()
     client = session.client(
-        service_name='secretsmanager',
+        service_name="secretsmanager",
         region_name=region_name,
     )
 
@@ -39,26 +41,26 @@ def get_secret(secret_name: str, secret_key: str, region_name: str = "us-west-1"
     # We rethrow the exception by default.
 
     try:
-        get_secret_value_response = client.get_secret_value(
-            SecretId=secret_name
-        )
+        get_secret_value_response = client.get_secret_value(SecretId=secret_name)
     except ClientError as e:
-        if e.response['Error']['Code'] == 'DecryptionFailureException':
+        if e.response["Error"]["Code"] == "DecryptionFailureException":
             raise e
-        elif e.response['Error']['Code'] == 'InternalServiceErrorException':
+        elif e.response["Error"]["Code"] == "InternalServiceErrorException":
             raise e
-        elif e.response['Error']['Code'] == 'InvalidParameterException':
+        elif e.response["Error"]["Code"] == "InvalidParameterException":
             raise e
-        elif e.response['Error']['Code'] == 'InvalidRequestException':
+        elif e.response["Error"]["Code"] == "InvalidRequestException":
             raise e
-        elif e.response['Error']['Code'] == 'ResourceNotFoundException':
+        elif e.response["Error"]["Code"] == "ResourceNotFoundException":
             raise e
     else:
         # Decrypts secret using the associated KMS CMK.
         # Depending on whether the secret is a string or binary, one of these fields will be populated.
-        if 'SecretString' in get_secret_value_response:
-            return json.loads(get_secret_value_response['SecretString']).get(secret_key)
+        if "SecretString" in get_secret_value_response:
+            return json.loads(get_secret_value_response["SecretString"]).get(secret_key)
         else:
-            return base64.b64decode(get_secret_value_response['SecretBinary']).get(secret_key)
-            
+            return base64.b64decode(get_secret_value_response["SecretBinary"]).get(
+                secret_key
+            )
+
     return None

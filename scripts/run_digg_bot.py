@@ -3,9 +3,7 @@ import json
 import os
 import sys
 
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src"))
-)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
 from digg_bot import DiggBot
 from utils import get_secret
@@ -33,7 +31,7 @@ if __name__ == "__main__":
         btc_oracle_abi=btc_oracle_abi,
         digg_oracle_abi=digg_oracle_abi,
         bot_token_secret_name=bot_token_secret_name,
-        bot_token_secret_key=bot_token_secret_key
+        bot_token_secret_key=bot_token_secret_key,
     )
 
     bot_token = get_secret(bot_token_secret_name, bot_token_secret_key)

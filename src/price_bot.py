@@ -35,8 +35,12 @@ class PriceBot(discord.Client):
         self.token_display = kwargs.get("token_display")
         self.token_address = kwargs.get("token_address")
         self.token_abi = kwargs.get("token_abi") if kwargs.get("token_abi") else None
-        self.monitoring_webhook_url = get_secret("price-bots/monitoring-webhook", "DISCORD_MONITORING_WEBHOOK_URL")
-        self.bot_token = get_secret(kwargs.get("bot_token_secret_name"), kwargs.get("bot_token_secret_key"))
+        self.monitoring_webhook_url = get_secret(
+            "price-bots/monitoring-webhook", "DISCORD_MONITORING_WEBHOOK_URL"
+        )
+        self.bot_token = get_secret(
+            kwargs.get("bot_token_secret_name"), kwargs.get("bot_token_secret_key")
+        )
         if self.token_address and self.token_abi:
             self.web3 = cache.get("web3")
             self.token_contract = self.web3.eth.contract(
@@ -64,7 +68,9 @@ class PriceBot(discord.Client):
             self.token_data.get("market_cap")
         )
         if self.token_display == "ibBTC":
-            activity_string += " btc=" + str(round(self.token_data.get("token_price_btc"), 2))
+            activity_string += " btc=" + str(
+                round(self.token_data.get("token_price_btc"), 2)
+            )
         activity = discord.Activity(
             name=activity_string,
             type=discord.ActivityType.playing,
@@ -82,10 +88,13 @@ class PriceBot(discord.Client):
                     except Exception as e:
                         self.logger.error("Error updated nickname")
                         self.logger.error(e)
-                        webhook = discord.Webhook.from_url(self.monitoring_webhook_url, adapter=discord.RequestsWebhookAdapter())
+                        webhook = discord.Webhook.from_url(
+                            self.monitoring_webhook_url,
+                            adapter=discord.RequestsWebhookAdapter(),
+                        )
                         embed = discord.Embed(
                             title=f"**{self.token_display} Price Bot Error**",
-                            description=f"Error message: {e}"
+                            description=f"Error message: {e}",
                         )
                         webhook.send(embed=embed, username="Price Bot Monitoring")
                         # sleep and restart bot if breaks
