@@ -1,7 +1,4 @@
 name: Tag on Main - Build and Deploy to Production Environment
-# Code should be validated in development environment before running this.
-# Code is expected to work, but may have unexpected bugs.
-
 on:
   push:
     branches:
@@ -101,16 +98,14 @@ jobs:
           echo "Push New Manifest"
           git push https://${{github.actor}}:${{secrets.GH_TOKEN}}@github.com/${{ env.MANIFEST_RESPOSITORY }}.git HEAD:${{env.TARGET_ENVIRONMENT}}
 
-
   notify:
     name: Notify Chat
     if: always()
     runs-on: ubuntu-latest
     needs: [deploy-prd]
     steps:
-    - name: Discord notification
-      env:
-        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-      uses: Ilshidur/action-discord@master
+    - name: Send status to Discord
+      uses: nebularg/actions-discord-webhook@v1
       with:
-        args: '${{github.event.repository.name}} has been deployed to ${{ env.TARGET_ENVIRONMENT }}.'
+        webhook_url: ${{ secrets.DISCORD_WEBHOOK }}
+        status: ${{ job.status }}
