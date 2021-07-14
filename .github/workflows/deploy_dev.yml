@@ -6,6 +6,8 @@ on:
   pull_request:
     branches:
       - main
+    paths:
+    - 'src/**'
 
 env:
   TARGET_ENVIRONMENT: 'dev'
