@@ -125,7 +125,6 @@ jobs:
     needs: [deploy-dev]
     steps:
     - name: Send status to Discord
-      uses: nebularg/actions-discord-webhook@v1
+      uses: johnnyhuy/discord-webhook@v0.0.1
       with:
         webhook_url: ${{ secrets.DISCORD_WEBHOOK }}
-        status: ${{ job.status }}
