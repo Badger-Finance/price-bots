@@ -1,0 +1,116 @@
+name: Tag on Main - Build and Deploy to Production Environment
+# Code should be validated in development environment before running this.
+# Code is expected to work, but may have unexpected bugs.
+
+on:
+  push:
+    branches:
+    - main
+
+env:
+  TARGET_ENVIRONMENT: 'prd'
+  MANIFEST_RESPOSITORY: 'badger-finance/badger-kube-manifests'
+  TAG_IMAGE_NAME: 'gcr.io/badger-finance/${{github.event.repository.name}}:${GITHUB_REF##*/}'
+
+jobs:
+  validate_manifest:
+    name: Run Manifest Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Service
+        uses: actions/checkout@main
+      - name: Run Manifest Validation
+        run: |
+          make install_validate_manifest
+          make validate_manifest TARGET_ENVIRONMENT=${{ env.TARGET_ENVIRONMENT }}
+
+  deploy-prd:
+    name: Release to Production Environemnt
+    if: github.event.base_ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    needs: [validate_manifest]
+    steps:
+      - name: Checkout Service
+        uses: actions/checkout@main
+        with:
+          ref: ${{ github.head_ref }}
+      - id: vars
+        name: Retreive Image ID
+        run: |
+          SHA=$(git rev-parse HEAD^2)
+          echo "::set-output name=sha::$SHA"
+      - name: Retag Image
+        shell: bash
+        run: |
+          docker tag gcr.io/badger-finance/${{github.event.repository.name}}:${{ steps.vars.outputs.sha }} ${{ env.TAG_IMAGE_NAME }}
+          docker image push ${{ env.TAG_IMAGE_NAME }}
+      - name: Checkout Manifest Repository
+        shell: bash
+        run: |
+          set -Eeuxo pipefail
+          WORKDIR="$(pwd)/manifests"
+          echo "Getting Git version info"
+          echo "Working directory is $WORKDIR"
+          /usr/bin/git version
+          echo "Initializing the repository"
+          /usr/bin/git init $WORKDIR
+          cd $WORKDIR
+          /usr/bin/git remote add origin https://github.com/${{ env.MANIFEST_RESPOSITORY }}
+          echo "Disabling automatic garbage collection"
+          /usr/bin/git config --local gc.auto 0
+          echo "Setting up auth"
+          git config --local user.email "github@badger-finance.com"
+          git config --local user.name "${{ github.actor }}"
+          /usr/bin/git config --local http.https://github.com/.extraheader "AUTHORIZATION: basic $(echo -n x-access-token:${{ secrets.GH_TOKEN }} | base64 )"
+          echo "Fetching the repository"
+          /usr/bin/git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin +refs/heads/${{ env.TARGET_ENVIRONMENT }}*:refs/remotes/origin/${{ env.TARGET_ENVIRONMENT }}* +refs/tags/${{ env.TARGET_ENVIRONMENT }}*:refs/tags/${{ env.TARGET_ENVIRONMENT }}*
+          echo "Determining the checkout info"
+          /usr/bin/git branch --list --remote origin/${{ env.TARGET_ENVIRONMENT }}
+          echo "Checking out the ref"
+          /usr/bin/git checkout --progress --force -B ${{ env.TARGET_ENVIRONMENT }} refs/remotes/origin/${{ env.TARGET_ENVIRONMENT }}
+          /usr/bin/git log -1 --format='%H'
+      - name: Create Application Definition
+        shell: bash
+        run: |
+          set -Eeuxo pipefail
+          echo "Creating Application Definition"
+          mkdir -p manifests/applications/
+          cat ./.deploy/base/.app.yaml | sed "s/TARGET_ENVIRONMENT/${{ env.TARGET_ENVIRONMENT }}/g" \
+              > manifests/applications/${{github.event.repository.name}}.yaml
+      - name: Kustomize Manifest
+        shell: bash
+        run: |
+          echo "Install Kustomize"
+          curl -o kustomize.tar.gz --location https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v3.8.1/kustomize_v3.8.1_linux_amd64.tar.gz
+          tar -xzvf kustomize.tar.gz
+          echo "Maybe Create Manifest Directory"
+          mkdir -p manifests/${{ github.event.repository.name }}/
+          echo "Kustomize Manifest and Replace with SHA"
+          ./kustomize build ./.deploy/${{ env.TARGET_ENVIRONMENT }} |
+          sed "s/COMMIT_SHA/${{ GITHUB_REF##*/ }}/g" \
+          > manifests/${{ github.event.repository.name }}/manifest.yaml
+      - name: Commit and Push New Manifest
+        shell: bash
+        run: |
+          echo "Commit New Manifest"
+          cd manifests
+          git config --local user.email "github@badger-finance.com"
+          git config --local user.name "${{ github.actor }}"
+          git add ${{ github.event.repository.name }} applications/
+          git commit -m "Deploying ${{ github.event.repository.name }}:${{ GITHUB_REF##*/ }}" || echo "¯\_(ツ)_/¯ Nothing changed, so nothing committed, and nothing new will be pushed to manifests."
+          echo "Push New Manifest"
+          git push https://${{github.actor}}:${{secrets.GH_TOKEN}}@github.com/${{ env.MANIFEST_RESPOSITORY }}.git HEAD:${{env.TARGET_ENVIRONMENT}}
+
+
+  notify:
+    name: Notify Chat
+    if: always()
+    runs-on: ubuntu-latest
+    needs: [deploy-prd]
+    steps:
+    - name: Discord notification
+      env:
+        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+      uses: Ilshidur/action-discord@master
+      with:
+        args: '${{github.event.repository.name}} has been deployed to ${{ env.TARGET_ENVIRONMENT }}.'

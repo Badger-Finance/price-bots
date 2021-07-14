@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: badger-price-bot
+  labels:
+    app: badger-price-bot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: badger-price-bot
+  template:
+    metadata:
+      labels:
+        app: badger-price-bot
+    spec:
+      serviceAccountName: badger-price-bot
+      containers:
+        - name: badger-price-bot
+          image: IMAGE_NAME
+          imagePullPolicy: IfNotPresent
+          command: ["python", "scripts/run_badger_bot.py"]
+          env:
+            - name: LOG_LEVEL
+              value: 'info'
+            - name: BOT_ID_BADGER
+              value: '835249232398254130'

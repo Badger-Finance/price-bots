@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: digg-price-bot
+  labels:
+    app: digg-price-bot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: digg-price-bot
+  template:
+    metadata:
+      labels:
+        app: digg-price-bot
+    spec:
+      serviceAccountName: digg-price-bot
+      containers:
+        - name: digg-price-bot
+          image: IMAGE_NAME
+          imagePullPolicy: IfNotPresent
+          command: ["python", "scripts/run_digg_bot.py"]
+          env:
+            - name: LOG_LEVEL
+              value: 'info'
+            - name: DIGG_ADDRESS
+              value: '0x798d1be841a82a273720ce31c822c61a67a601c3'
+            - name: BOT_ID_DIGG
+              value: '835276963668819998'

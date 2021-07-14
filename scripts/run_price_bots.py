@@ -1,19 +1,14 @@
 import asyncio
-from dotenv import load_dotenv
 import json
 import os
 import sys
 
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src"))
-)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
 from honey_badger import BadgerBot
 from price_bot import PriceBot
 from sett_bot import SettBot
 from digg_bot import DiggBot
-
-load_dotenv()
 
 if __name__ == "__main__":
     with open("./contracts/abi/digg.json") as digg_abi_file, open(

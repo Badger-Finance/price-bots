@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bdigg-price-bot
+  labels:
+    app: bdigg-price-bot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bdigg-price-bot
+  template:
+    metadata:
+      labels:
+        app: bdigg-price-bot
+    spec:
+      serviceAccountName: bdigg-price-bot
+      containers:
+        - name: bdigg-price-bot
+          image: IMAGE_NAME
+          imagePullPolicy: IfNotPresent
+          command: ["python", "scripts/run_bdigg_bot.py"]
+          env:
+            - name: LOG_LEVEL
+              value: 'info'
+            - name: BDIGG_ADDRESS
+              value: '0x7e7E112A68d8D2E221E11047a72fFC1065c38e1a'
+            - name: BOT_ID_BDIGG
+              value: '835277400002002985'

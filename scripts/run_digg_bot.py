@@ -1,16 +1,12 @@
 import asyncio
-from dotenv import load_dotenv
 import json
 import os
 import sys
 
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src"))
-)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
 from digg_bot import DiggBot
-
-load_dotenv()
+from utils import get_secret
 
 if __name__ == "__main__":
     with open("./contracts/abi/digg.json") as digg_abi_file:
@@ -21,6 +17,11 @@ if __name__ == "__main__":
         digg_oracle_abi = json.load(digg_oracle_abi_file)
 
     loop = asyncio.get_event_loop()
+    # name of secret in secrets manager
+    bot_token_secret_name = "price-bots/digg-bot-token"
+    # key value to retrieve secret value after boto3 call to secretsmanager
+    bot_token_secret_key = "BOT_TOKEN_DIGG"
+
     digg_client = DiggBot(
         coingecko_token_id="digg",
         token_display="DIGG",
@@ -28,9 +29,12 @@ if __name__ == "__main__":
         token_abi=digg_abi,
         discord_id=os.getenv("BOT_ID_DIGG"),
         btc_oracle_abi=btc_oracle_abi,
-        digg_oracle_abi=digg_oracle_abi
+        digg_oracle_abi=digg_oracle_abi,
+        bot_token_secret_name=bot_token_secret_name,
+        bot_token_secret_key=bot_token_secret_key,
     )
 
-    loop.create_task(digg_client.start(os.getenv("BOT_TOKEN_DIGG")))
+    bot_token = get_secret(bot_token_secret_name, bot_token_secret_key)
+    loop.create_task(digg_client.start(bot_token))
 
     loop.run_forever()

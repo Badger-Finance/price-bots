@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ibbtc-price-bot
+  labels:
+    app: ibbtc-price-bot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ibbtc-price-bot
+  template:
+    metadata:
+      labels:
+        app: ibbtc-price-bot
+    spec:
+      serviceAccountName: ibbtc-price-bot
+      containers:
+        - name: ibbtc-price-bot
+          image: IMAGE_NAME
+          imagePullPolicy: IfNotPresent
+          command: ["python", "scripts/run_ibbtc_bot.py"]
+          env:
+            - name: LOG_LEVEL
+              value: 'info'
+            - name: BOT_ID_IBBTC
+              value: '850192794517897236'
