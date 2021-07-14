@@ -108,4 +108,4 @@ jobs:
       uses: nebularg/actions-discord-webhook@v1
       with:
         webhook_url: ${{ secrets.DISCORD_WEBHOOK }}
-        status: ${{ job.deploy-prd.status }}
+        status: ${{ jobs.deploy-prd.status }}
