@@ -125,6 +125,6 @@ jobs:
     needs: [deploy-dev]
     steps:
     - name: Send status to Discord
-      uses: johnnyhuy/discord-webhook@v0.0.1
+      uses: johnnyhuy/discord-webhook@main
       with:
         webhook_url: ${{ secrets.DISCORD_WEBHOOK }}
