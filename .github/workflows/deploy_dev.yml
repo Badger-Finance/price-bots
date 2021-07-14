@@ -8,6 +8,7 @@ on:
       - main
     paths:
     - 'src/**'
+    - 'scripts/**'
 
 env:
   TARGET_ENVIRONMENT: 'dev'
