@@ -4,6 +4,7 @@ import os
 from price_bot import PriceBot
 import requests
 import json
+from time import sleep
 from web3 import Web3
 
 UPDATE_INTERVAL_SECONDS = 45
