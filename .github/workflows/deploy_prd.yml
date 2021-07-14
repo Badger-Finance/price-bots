@@ -1,7 +1,4 @@
 name: Tag on Main - Build and Deploy to Production Environment
-# Code should be validated in development environment before running this.
-# Code is expected to work, but may have unexpected bugs.
-
 on:
   push:
     branches:
@@ -111,4 +108,4 @@ jobs:
       uses: nebularg/actions-discord-webhook@v1
       with:
         webhook_url: ${{ secrets.DISCORD_WEBHOOK }}
-        status: ${{ job.status }}
+        status: ${{ job.deploy-prd.status }}

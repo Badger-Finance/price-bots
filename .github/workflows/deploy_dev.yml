@@ -1,7 +1,4 @@
 name: Pull Request - Build and Deploy to Development Environment
-# Code probably works, but may not.
-# Pushing to development environment allows for validation.
-
 on:
   pull_request:
     branches:
@@ -131,4 +128,4 @@ jobs:
       uses: nebularg/actions-discord-webhook@v1
       with:
         webhook_url: ${{ secrets.DISCORD_WEBHOOK }}
-        status: ${{ job.status }}
+        status: ${{ job.deploy-dev.status }}
