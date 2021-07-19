@@ -111,20 +111,23 @@ class PriceBot(discord.Client):
         Private function to make call to coingecko to retrieve price and market cap for the token and update
         token data property.
         """
-        response = self.session.get(
-            f"https://api.coingecko.com/api/v3/coins/{self.coingecko_token_id}"
-        ).content
-        token_data = json.loads(response)
+        try:
+            response = self.session.get(
+                f"https://api.coingecko.com/api/v3/coins/{self.coingecko_token_id}"
+            ).content
+            token_data = json.loads(response)
+            
+            token_price_usd = token_data.get("market_data").get("current_price").get("usd")
+            token_price_btc = token_data.get("market_data").get("current_price").get("btc")
+            market_cap = token_data.get("market_data").get("market_cap").get("usd")
 
-        token_price_usd = token_data.get("market_data").get("current_price").get("usd")
-        token_price_btc = token_data.get("market_data").get("current_price").get("btc")
-        market_cap = token_data.get("market_data").get("market_cap").get("usd")
-
-        self.token_data = {
-            "token_price_usd": token_price_usd,
-            "token_price_btc": token_price_btc,
-            "market_cap": market_cap,
-        }
+            self.token_data = {
+                "token_price_usd": token_price_usd,
+                "token_price_btc": token_price_btc,
+                "market_cap": market_cap,
+            }
+        except json.JSONDecodeError:
+            self.logger.error("Error decoding json")
 
     def _get_number_label(self, value: str) -> str:
         """
