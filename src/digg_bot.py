@@ -25,7 +25,7 @@ class DiggBot(PriceBot):
         self.digg_oracle_abi = kwargs.get("digg_oracle_abi")
         self.btc_oracle_abi = kwargs.get("btc_oracle_abi")
         self.uni_pool_abi = kwargs.get("uni_pool_abi")
-        self.sushi_pool_abi = kwargs.get("suhi_pool_abi")
+        self.sushi_pool_abi = kwargs.get("sushi_pool_abi")
         self.btc_oracle_contract = self.web3.eth.contract(
             address=self.web3.toChecksumAddress(BTC_USD_ORACLE_ADDRESS),
             abi=self.btc_oracle_abi,
