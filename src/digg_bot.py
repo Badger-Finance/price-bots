@@ -119,15 +119,25 @@ class DiggBot(PriceBot):
             _,
         ) = self.uni_pool_contract.functions.getReserves().call()
 
+        self.logger.info(f"btc_shares_uni: {btc_shares_uni}")
+        self.logger.info(f"digg_shares_uni: {digg_shares_uni}")
+        self.logger.info(f"ratio: {btc_shares_uni / digg_shares_uni}")
+
         (
             btc_shares_sushi,
             digg_shares_sushi,
             _,
         ) = self.sushi_pool_contract.functions.getReserves().call()
 
+        self.logger.info(f"btc_shares_sushi: {btc_shares_sushi}")
+        self.logger.info(f"digg_shares_sushi: {digg_shares_sushi}")
+        self.logger.info(f"ratio: {btc_shares_sushi / digg_shares_sushi}")
+
         digg_wbtc_price = (
             (btc_shares_uni / digg_shares_uni) + (btc_shares_sushi / digg_shares_sushi)
         ) / 2
+
+        self.logger.info(f"digg_wbtc_price: {digg_wbtc_price}")
 
         return Decimal(digg_wbtc_price)
 
