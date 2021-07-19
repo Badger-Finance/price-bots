@@ -13,6 +13,8 @@ UPDATE_INTERVAL_SECONDS = 45
 
 BTC_USD_ORACLE_ADDRESS = "0xF4030086522a5bEEa4988F8cA5B36dbC97BeE88c"
 DIGG_BTC_ORACLE_ADDRESS = "0x418a6C98CD5B8275955f08F0b8C1c6838c8b1685"
+UNI_POOL_ADDRESS = "0xE86204c4eDDd2f70eE00EAd6805f917671F56c52"
+SUSHI_POOL_ADDRESS = "0x9a13867048e01c663ce8ce2fe0cdae69ff9f35e3"
 
 
 class DiggBot(PriceBot):
@@ -22,9 +24,19 @@ class DiggBot(PriceBot):
         )
         self.digg_oracle_abi = kwargs.get("digg_oracle_abi")
         self.btc_oracle_abi = kwargs.get("btc_oracle_abi")
+        self.uni_pool_abi = kwargs.get("digg_oracle_abi")
+        self.sushi_pool_abi = kwargs.get("digg_oracle_abi")
         self.btc_oracle_contract = self.web3.eth.contract(
             address=self.web3.toChecksumAddress(BTC_USD_ORACLE_ADDRESS),
             abi=self.btc_oracle_abi,
+        )
+        self.uni_pool_contract = self.web3.eth.contract(
+            address=self.web3.toChecksumAddress(UNI_POOL_ADDRESS),
+            abi=self.uni_pool_abi,
+        )
+        self.sushi_pool_contract = self.web3.eth.contract(
+            address=self.web3.toChecksumAddress(SUSHI_POOL_ADDRESS),
+            abi=self.sushi_pool_abi,
         )
         self.digg_oracle_contract = self.web3.eth.contract(
             address=self.web3.toChecksumAddress(DIGG_BTC_ORACLE_ADDRESS),
@@ -101,12 +113,25 @@ class DiggBot(PriceBot):
 
     def _get_digg_btc_price(self) -> Decimal:
 
-        return Decimal(
-            self.digg_oracle_contract.functions.latestRoundData().call()[1] / 10 ** 8
-        )
+        (
+            btc_shares_uni,
+            digg_shares_uni,
+            _,
+        ) = self.uni_pool_contract.functions.getReserves().call()
+
+        (
+            btc_shares_sushi,
+            digg_shares_sushi,
+            _,
+        ) = self.sushi_pool_contract.functions.getReserves().call()
+
+        digg_wbtc_price = (
+            (btc_shares_uni / digg_shares_uni) + (btc_shares_sushi / digg_shares_sushi)
+        ) / 2
+
+        return Decimal(digg_wbtc_price)
 
     def _get_btc_usd_price(self) -> Decimal:
-
         return Decimal(
             self.btc_oracle_contract.functions.latestRoundData().call()[1] / 10 ** 8
         )
