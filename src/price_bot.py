@@ -86,8 +86,9 @@ class PriceBot(discord.Client):
                             + str(self.token_data.get("token_price_usd"))
                         )
                     except Exception as e:
-                        self.logger.error("Error updated nickname")
+                        self.logger.error("Error updating nickname")
                         self.logger.error(e)
+                        sleep(10)
                         webhook = discord.Webhook.from_url(
                             self.monitoring_webhook_url,
                             adapter=discord.RequestsWebhookAdapter(),
@@ -96,11 +97,14 @@ class PriceBot(discord.Client):
                             title=f"**{self.token_display} Price Bot Error**",
                             description=f"Error message: {e}",
                         )
-                        webhook.send(embed=embed, username="Price Bot Monitoring")
-                        # sleep and restart bot if breaks
-                        sleep(10)
-                        await self.logout()
-                        await self.start(self.bot_token)
+                        try:
+                            webhook.send(embed=embed, username="Price Bot Monitoring")
+                        except Exception as e:
+                            self.logger.error("Error sending webhook")
+                        finally:
+                            # restart bot if breaks
+                            await self.logout()
+                            await self.start(self.bot_token)
 
     @update_price.before_loop
     async def before_update_price(self):
