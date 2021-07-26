@@ -105,6 +105,7 @@ class PriceBot(discord.Client):
                             # restart bot if breaks
                             await self.logout()
                             await self.start(self.bot_token)
+                            self.update_price.start()
 
     @update_price.before_loop
     async def before_update_price(self):
