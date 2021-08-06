@@ -86,8 +86,9 @@ class PriceBot(discord.Client):
                             + str(self.token_data.get("token_price_usd"))
                         )
                     except Exception as e:
-                        self.logger.error("Error updated nickname")
+                        self.logger.error("Error updating nickname")
                         self.logger.error(e)
+                        sleep(10)
                         webhook = discord.Webhook.from_url(
                             self.monitoring_webhook_url,
                             adapter=discord.RequestsWebhookAdapter(),
@@ -96,11 +97,15 @@ class PriceBot(discord.Client):
                             title=f"**{self.token_display} Price Bot Error**",
                             description=f"Error message: {e}",
                         )
-                        webhook.send(embed=embed, username="Price Bot Monitoring")
-                        # sleep and restart bot if breaks
-                        sleep(10)
-                        await self.logout()
-                        await self.start(self.bot_token)
+                        try:
+                            webhook.send(embed=embed, username="Price Bot Monitoring")
+                        except Exception as e:
+                            self.logger.error("Error sending webhook")
+                        finally:
+                            # restart bot if breaks
+                            await self.logout()
+                            await self.start(self.bot_token)
+                            self.update_price.start()
 
     @update_price.before_loop
     async def before_update_price(self):
@@ -116,9 +121,13 @@ class PriceBot(discord.Client):
                 f"https://api.coingecko.com/api/v3/coins/{self.coingecko_token_id}"
             ).content
             token_data = json.loads(response)
-            
-            token_price_usd = token_data.get("market_data").get("current_price").get("usd")
-            token_price_btc = token_data.get("market_data").get("current_price").get("btc")
+
+            token_price_usd = (
+                token_data.get("market_data").get("current_price").get("usd")
+            )
+            token_price_btc = (
+                token_data.get("market_data").get("current_price").get("btc")
+            )
             market_cap = token_data.get("market_data").get("market_cap").get("usd")
 
             self.token_data = {

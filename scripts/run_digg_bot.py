@@ -15,6 +15,10 @@ if __name__ == "__main__":
         btc_oracle_abi = json.load(btc_oracle_abi_file)
     with open("./contracts/abi/digg_btc_oracle.json") as digg_oracle_abi_file:
         digg_oracle_abi = json.load(digg_oracle_abi_file)
+    with open("./contracts/abi/uni_pool.json") as uni_pool_file:
+        uni_pool_abi = json.load(uni_pool_file)
+    with open("./contracts/abi/sushi_pool.json") as sushi_pool_file:
+        sushi_pool_abi = json.load(sushi_pool_file)
 
     loop = asyncio.get_event_loop()
     # name of secret in secrets manager
@@ -32,6 +36,8 @@ if __name__ == "__main__":
         digg_oracle_abi=digg_oracle_abi,
         bot_token_secret_name=bot_token_secret_name,
         bot_token_secret_key=bot_token_secret_key,
+        uni_pool_abi=uni_pool_abi,
+        sushi_pool_abi=sushi_pool_abi,
     )
 
     bot_token = get_secret(bot_token_secret_name, bot_token_secret_key)
