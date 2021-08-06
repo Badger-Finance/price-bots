@@ -29,43 +29,49 @@ class SettBot(PriceBot):
         self._get_token_data()
 
         # for badger sett tokens, write different activity string for AUM
-        activity_string = (
-            "aum=$"
-            + self._get_number_label(self._get_aum())
-            + " ratio="
-            + str(self._get_underlying_ratio())
-        )
-        self.logger.info("activity string: " + activity_string)
-        activity = discord.Activity(
-            name=activity_string,
-            type=discord.ActivityType.playing,
-        )
-        await self.change_presence(activity=activity)
-        for guild in self.guilds:
-            self.logger.info(guild.members)
-            for member in guild.members:
-                if str(member.id) == self.discord_id:
-                    try:
-                        await member.edit(
-                            nick=f"{self.token_display} $"
-                            + str(self.token_data.get("token_price_usd"))
-                        )
-                    except Exception as e:
-                        self.logger.error("Error updated nickname")
-                        self.logger.error(e)
-                        webhook = discord.Webhook.from_url(
-                            os.getenv("DISCORD_MONITORING_WEBHOOK_URL"),
-                            adapter=discord.RequestsWebhookAdapter(),
-                        )
-                        embed = discord.Embed(
-                            title=f"**{self.token_display} Price Bot Error**",
-                            description=f"Error message: {e}",
-                        )
-                        webhook.send(embed=embed, username="Price Bot Monitoring")
-                        # sleep and restart bot if breaks
-                        sleep(10)
-                        await self.logout()
-                        await self.start(self.bot_token)
+        try:
+            activity_string = (
+                "aum=$"
+                + self._get_number_label(self._get_aum())
+                + " ratio="
+                + str(self._get_underlying_ratio())
+            )
+        except ValueError as e:
+            self.logger.error(e)
+            activity_string = None
+
+        if activity_string:
+            self.logger.info("activity string: " + activity_string)
+            activity = discord.Activity(
+                name=activity_string,
+                type=discord.ActivityType.playing,
+            )
+            await self.change_presence(activity=activity)
+            for guild in self.guilds:
+                self.logger.info(guild.members)
+                for member in guild.members:
+                    if str(member.id) == self.discord_id:
+                        try:
+                            await member.edit(
+                                nick=f"{self.token_display} $"
+                                + str(self.token_data.get("token_price_usd"))
+                            )
+                        except Exception as e:
+                            self.logger.error("Error updated nickname")
+                            self.logger.error(e)
+                            webhook = discord.Webhook.from_url(
+                                os.getenv("DISCORD_MONITORING_WEBHOOK_URL"),
+                                adapter=discord.RequestsWebhookAdapter(),
+                            )
+                            embed = discord.Embed(
+                                title=f"**{self.token_display} Price Bot Error**",
+                                description=f"Error message: {e}",
+                            )
+                            webhook.send(embed=embed, username="Price Bot Monitoring")
+                            # sleep and restart bot if breaks
+                            sleep(10)
+                            await self.logout()
+                            await self.start(self.bot_token)
 
     @update_price.before_loop
     async def before_update_price(self):

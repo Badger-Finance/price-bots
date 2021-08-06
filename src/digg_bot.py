@@ -134,8 +134,13 @@ class DiggBot(PriceBot):
         self.logger.info(f"ratio: {btc_shares_sushi / digg_shares_sushi}")
 
         digg_wbtc_price = (
-            (btc_shares_uni / digg_shares_uni) + (btc_shares_sushi / digg_shares_sushi)
-        ) / 2 * 10 # multiply by 10 because wbtc has 8 decimals, digg has 9
+            (
+                (btc_shares_uni / digg_shares_uni)
+                + (btc_shares_sushi / digg_shares_sushi)
+            )
+            / 2
+            * 10
+        )  # multiply by 10 because wbtc has 8 decimals, digg has 9
 
         self.logger.info(f"digg_wbtc_price: {digg_wbtc_price}")
 
