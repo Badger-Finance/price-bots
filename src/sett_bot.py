@@ -60,7 +60,7 @@ class SettBot(PriceBot):
                             self.logger.error("Error updated nickname")
                             self.logger.error(e)
                             webhook = discord.Webhook.from_url(
-                                os.getenv("DISCORD_MONITORING_WEBHOOK_URL"),
+                                self.monitoring_webhook_url,
                                 adapter=discord.RequestsWebhookAdapter(),
                             )
                             embed = discord.Embed(

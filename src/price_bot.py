@@ -103,7 +103,7 @@ class PriceBot(discord.Client):
                             self.logger.error("Error sending webhook")
                         finally:
                             # restart bot if breaks
-                            await self.logout()
+                            await self.close()
                             await self.start(self.bot_token)
                             self.update_price.start()
 
