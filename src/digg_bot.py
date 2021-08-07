@@ -88,7 +88,7 @@ class DiggBot(PriceBot):
                         webhook.send(embed=embed, username="Price Bot Monitoring")
                         # sleep and restart bot if breaks
                         sleep(10)
-                        await self.logout()
+                        await self.close()
                         await self.start(self.bot_token)
 
     @update_price.before_loop
