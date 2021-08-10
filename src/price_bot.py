@@ -100,12 +100,8 @@ class PriceBot(discord.Client):
                         try:
                             webhook.send(embed=embed, username="Price Bot Monitoring")
                         except Exception as e:
-                            self.logger.error("Error sending webhook")
-                        finally:
-                            # restart bot if breaks
-                            await self.close()
-                            await self.start(self.bot_token)
-                            self.update_price.start()
+                            self.logger.error(f"Error sending webhook: {e}")
+                            self.logger.error("passing out of loop, hopefully restart")
 
     @update_price.before_loop
     async def before_update_price(self):
