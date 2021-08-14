@@ -77,19 +77,18 @@ class DiggBot(PriceBot):
                     except Exception as e:
                         self.logger.error("Error updated nickname")
                         self.logger.error(e)
-                        webhook = discord.Webhook.from_url(
-                            os.getenv("DISCORD_MONITORING_WEBHOOK_URL"),
-                            adapter=discord.RequestsWebhookAdapter(),
-                        )
-                        embed = discord.Embed(
-                            title=f"**{self.token_display} Price Bot Error**",
-                            description=f"Error message: {e}",
-                        )
-                        webhook.send(embed=embed, username="Price Bot Monitoring")
-                        # sleep and restart bot if breaks
-                        sleep(10)
-                        await self.close()
-                        await self.start(self.bot_token)
+                        try:
+                            webhook = discord.Webhook.from_url(
+                                os.getenv("DISCORD_MONITORING_WEBHOOK_URL"),
+                                adapter=discord.RequestsWebhookAdapter(),
+                            )
+                            embed = discord.Embed(
+                                title=f"**{self.token_display} Price Bot Error**",
+                                description=f"Error message: {e}",
+                            )
+                            webhook.send(embed=embed, username="Price Bot Monitoring")
+                        except Exception as e:
+                            self.logger.error(f"error sending webhok: {e}")
 
     @update_price.before_loop
     async def before_update_price(self):
