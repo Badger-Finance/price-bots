@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: git@github.com:badger-finance/badger-kube-manifests
+    repoURL: https://github.com/Badger-Finance/badger-kube-manifests
     path: price-bots/
     targetRevision: TARGET_ENVIRONMENT # dont worry about this, this gets replaced in the automation pipeline
   destination:
