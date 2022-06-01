@@ -1,6 +1,7 @@
 # price-bots
 Discord price bots framework using CoinGecko, web3, and python.
 
+
 ### How to Run
 
 #### Environment Variables
