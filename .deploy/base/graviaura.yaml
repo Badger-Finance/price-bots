@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: graviaura-price-bot
+  labels:
+    app: graviaura-price-bot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: graviaura-price-bot
+  template:
+    metadata:
+      labels:
+        app: graviaura-price-bot
+    spec:
+      serviceAccountName: graviaura-price-bot
+      containers:
+        - name: graviaura-price-bot
+          image: IMAGE_NAME
+          imagePullPolicy: IfNotPresent
+          command: ["python", "scripts/run_graviaura_bot.py"]
+          env:
+            - name: LOG_LEVEL
+              value: 'info'
+            - name: BOT_ID_GRAVIAURA
+              value: '1001238048446619759'
