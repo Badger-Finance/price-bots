@@ -10,10 +10,6 @@ from utils import get_secret
 from web3 import Web3
 
 logging.basicConfig(
-    # filename="price_bots_log.txt",
-    # filemode='a',
-    # format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-    # datefmt='%H:%M:%S',
     level=logging.INFO
 )
 UPDATE_INTERVAL_SECONDS = 45
@@ -70,6 +66,10 @@ class PriceBot(discord.Client):
         if self.token_display == "ibBTC":
             activity_string += " btc=" + str(
                 round(self.token_data.get("token_price_btc"), 2)
+            )
+        elif self.token_display == "graviAURA":
+            activity_string += " aura=" + str(
+                round(self.token_data.get("token_price_aura"), 2)
             )
         activity = discord.Activity(
             name=activity_string,
@@ -131,6 +131,12 @@ class PriceBot(discord.Client):
                 "token_price_btc": token_price_btc,
                 "market_cap": market_cap,
             }
+            if self.token_display == "graviAURA":
+                aura_response = self.session.get(
+                    f"https://api.coingecko.com/api/v3/coins/aura-finance"
+                ).content
+                aura_usd = json.loads(aura_response).get("market_data").get("current_price").get("usd")
+                self.token_data["token_price_aura"] = self.token_data["token_price_usd"] / aura_usd
         except json.JSONDecodeError:
             self.logger.error("Error decoding json")
 

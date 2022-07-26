@@ -5,6 +5,6 @@ resources:
   - bbadger.yaml
   - bdigg.yaml
   - digg.yaml
+  - graviaura.yaml
   - ibbtc.yaml
-  - service.yaml
   - service_account.yaml
