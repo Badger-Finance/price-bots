@@ -124,7 +124,13 @@ class PriceBot(discord.Client):
             token_price_btc = (
                 token_data.get("market_data").get("current_price").get("btc")
             )
-            market_cap = token_data.get("market_data").get("market_cap").get("usd")
+
+            if self.token_display == "graviAURA":
+                market_cap = (
+                    token_data.get("market_data").get("total_supply") * token_price_usd
+                )
+            else:
+                market_cap = token_data.get("market_data").get("market_cap").get("usd")
 
             self.token_data = {
                 "token_price_usd": token_price_usd,
