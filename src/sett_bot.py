@@ -68,10 +68,14 @@ class SettBot(PriceBot):
                                 description=f"Error message: {e}",
                             )
                             try:
-                                webhook.send(embed=embed, username="Price Bot Monitoring")
+                                webhook.send(
+                                    embed=embed, username="Price Bot Monitoring"
+                                )
                             except Exception as e:
                                 self.logger.error(f"Error sending webhook: {e}")
-                                self.logger.error("passing out of loop, hopefully restart")
+                                self.logger.error(
+                                    "passing out of loop, hopefully restart"
+                                )
 
     @update_price.before_loop
     async def before_update_price(self):
