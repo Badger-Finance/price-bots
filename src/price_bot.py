@@ -9,9 +9,7 @@ from time import sleep
 from utils import get_secret
 from web3 import Web3
 
-logging.basicConfig(
-    level=logging.INFO
-)
+logging.basicConfig(level=logging.INFO)
 UPDATE_INTERVAL_SECONDS = 45
 cache = {}
 
@@ -141,10 +139,19 @@ class PriceBot(discord.Client):
                 aura_response = self.session.get(
                     f"https://api.coingecko.com/api/v3/coins/aura-finance"
                 ).content
-                aura_usd = json.loads(aura_response).get("market_data").get("current_price").get("usd")
-                self.token_data["token_price_aura"] = self.token_data["token_price_usd"] / aura_usd
+                aura_usd = (
+                    json.loads(aura_response)
+                    .get("market_data")
+                    .get("current_price")
+                    .get("usd")
+                )
+                self.token_data["token_price_aura"] = (
+                    self.token_data["token_price_usd"] / aura_usd
+                )
         except json.JSONDecodeError:
             self.logger.error("Error decoding json")
+        except AttributeError:
+            self.logger.error("Error accessing price data")
 
     def _get_number_label(self, value: str) -> str:
         """
