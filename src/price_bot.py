@@ -83,7 +83,6 @@ class PriceBot(discord.Client):
         )
         await self.change_presence(activity=activity)
         for guild in self.guilds:
-            self.logger.info(guild.members)
             for member in guild.members:
                 if str(member.id) == self.discord_id:
                     try:
