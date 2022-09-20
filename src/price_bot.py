@@ -1,15 +1,21 @@
 import discord
-from discord.ext import commands, tasks
 import json
 import logging
 import math
 import os
 import requests
+
+from discord.ext import commands, tasks
+from pythonjsonlogger import jsonlogger
 from time import sleep
-from utils import get_secret
 from web3 import Web3
 
-logging.basicConfig(level=logging.INFO)
+from utils import get_secret
+
+log_handler = logging.StreamHandler()
+formatter = jsonlogger.JsonFormatter()
+log_handler.setFormatter(formatter)
+
 UPDATE_INTERVAL_SECONDS = 45
 cache = {}
 
@@ -18,6 +24,8 @@ class PriceBot(discord.Client):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.logger = logging.getLogger("price-bot")
+        self.logger.addHandler(log_handler)
+        self.logger.setLevel(logging.INFO)
         if cache.get("session") == None:
             cache["session"] = requests.Session()
         if cache.get("web3") == None:
