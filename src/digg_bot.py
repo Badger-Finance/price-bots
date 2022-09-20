@@ -88,7 +88,7 @@ class DiggBot(PriceBot):
                             )
                             webhook.send(embed=embed, username="Price Bot Monitoring")
                         except Exception as e:
-                            self.logger.error(f"error sending webhok: {e}")
+                            self.logger.error(f"error sending webhook: {e}")
 
     @update_price.before_loop
     async def before_update_price(self):
@@ -118,19 +118,11 @@ class DiggBot(PriceBot):
             _,
         ) = self.uni_pool_contract.functions.getReserves().call()
 
-        self.logger.info(f"btc_shares_uni: {btc_shares_uni}")
-        self.logger.info(f"digg_shares_uni: {digg_shares_uni}")
-        self.logger.info(f"ratio: {btc_shares_uni / digg_shares_uni}")
-
         (
             btc_shares_sushi,
             digg_shares_sushi,
             _,
         ) = self.sushi_pool_contract.functions.getReserves().call()
-
-        self.logger.info(f"btc_shares_sushi: {btc_shares_sushi}")
-        self.logger.info(f"digg_shares_sushi: {digg_shares_sushi}")
-        self.logger.info(f"ratio: {btc_shares_sushi / digg_shares_sushi}")
 
         digg_wbtc_price = (
             (
@@ -140,8 +132,6 @@ class DiggBot(PriceBot):
             / 2
             * 10
         )  # multiply by 10 because wbtc has 8 decimals, digg has 9
-
-        self.logger.info(f"digg_wbtc_price: {digg_wbtc_price}")
 
         return Decimal(digg_wbtc_price)
 

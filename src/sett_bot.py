@@ -48,7 +48,6 @@ class SettBot(PriceBot):
             )
             await self.change_presence(activity=activity)
             for guild in self.guilds:
-                self.logger.info(guild.members)
                 for member in guild.members:
                     if str(member.id) == self.discord_id:
                         try:
@@ -89,7 +88,6 @@ class SettBot(PriceBot):
             self.token_contract.functions.totalSupply().call()
             / 10 ** self.token_contract.functions.decimals().call()
         )
-        self.logger.info(f"{self.token_display} supply: {supply}")
         return supply
 
     def _get_underlying_ratio(self):
